@@ -6,7 +6,7 @@
     <title>Tug'ilgan kuningiz muborak bo'lsin!</title>
     <!-- Google Fonts: Kalligrafik shriftlar -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Parisienne&display=swap" rel="stylesheet">
-    
+
     <style>
         * {
             margin: 0;
@@ -40,32 +40,45 @@
             z-index: 1;
         }
 
-        .star {
+        /* Mayda, ko'p sonli yaltiroq nuqta-yulduzlar */
+        .star-dot {
             position: absolute;
-            background: #ffffff;
-            clip-path: polygon(
-                35% 0%, 65% 0%, 
-                65% 35%, 100% 35%, 
-                100% 65%, 65% 65%, 
-                65% 100%, 35% 100%, 
-                35% 65%, 0% 65%, 
-                0% 35%, 35% 35%
-            );
-            box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
-            animation: pulseStar var(--duration) infinite ease-in-out;
+            border-radius: 50%;
+            animation: dotTwinkle var(--duration) infinite ease-in-out;
+            animation-delay: var(--delay);
             will-change: transform, opacity;
             transform: translateZ(0);
         }
 
-        @keyframes pulseStar {
-            0%, 100% { 
-                opacity: 0.2; 
-                transform: scale(0.4) rotate(0deg); 
+        @keyframes dotTwinkle {
+            0%, 100% {
+                opacity: 0.15;
+                transform: scale(0.6);
             }
-            50% { 
-                opacity: 1; 
-                transform: scale(1.2) rotate(45deg); 
-                box-shadow: 0 0 12px rgba(255, 255, 255, 1);
+            50% {
+                opacity: 1;
+                transform: scale(1.15);
+            }
+        }
+
+        /* Chiroyli beshburchakli yulduzchalar (aksent) */
+        .star-sparkle {
+            position: absolute;
+            clip-path: polygon(50% 0%, 61.8% 38.2%, 100% 38.2%, 69.1% 61.8%, 80.9% 100%, 50% 76.4%, 19.1% 100%, 30.9% 61.8%, 0% 38.2%, 38.2% 38.2%);
+            animation: sparkleTwinkle var(--duration) infinite ease-in-out;
+            animation-delay: var(--delay);
+            will-change: transform, opacity;
+            transform: translateZ(0);
+        }
+
+        @keyframes sparkleTwinkle {
+            0%, 100% {
+                opacity: 0.25;
+                transform: scale(0.5) rotate(0deg);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05) rotate(25deg);
             }
         }
 
@@ -151,17 +164,16 @@
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 117, 140, 0.3);
-            padding: 25px 20px;
+            padding: 30px 20px;
             border-radius: 20px;
             box-shadow: 0 0 40px rgba(255, 117, 140, 0.15), 0 15px 30px rgba(0, 0, 0, 0.5);
-            text-align: left;
+            text-align: center;
             position: relative;
             max-height: 72vh;
             overflow-y: auto;
-            -webkit-overflow-scrolling: touch; /* Telefon uchun silliq skroll */
+            -webkit-overflow-scrolling: touch;
         }
 
-        /* Skrollnari chiroyli qilish */
         .letter-card::-webkit-scrollbar {
             width: 4px;
         }
@@ -172,36 +184,84 @@
 
         .letter-card h2 {
             font-family: 'French Script MT', 'Parisienne', cursive;
-            font-size: 2.8rem;
+            font-size: 2.6rem;
             color: #ff7eb3;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             text-align: center;
             font-weight: normal;
             text-shadow: 0 0 8px rgba(255, 126, 179, 0.4);
         }
 
+        /* She'r/matn ko'rinadigan hudud */
         .letter-text {
-            font-size: 1rem;
-            line-height: 1.8;
-            color: #ffffff;
-            margin-bottom: 20px;
-            white-space: pre-wrap;
+            min-height: 110px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            font-size: 1.15rem;
+            line-height: 1.9;
+            color: #f5f0ff;
+            margin-bottom: 10px;
+            padding: 10px 4px;
         }
 
-        /* O'qib bo'lingan qizil iz */
-        .read-text {
+        /* Bir vaqtda faqat bitta gap: teng ravishda paydo bo'ladi va yo'qoladi */
+        .poem-line {
+            opacity: 0;
+            transform: translateY(16px);
+            transition: opacity 0.75s ease, transform 0.75s ease;
+            text-align: center;
+            width: 100%;
+        }
+
+        .poem-line.line-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .poem-line.line-exit {
+            opacity: 0;
+            transform: translateY(-16px);
+        }
+
+        /* Harflar chapdan o'ngga o'qilgan sari qizil rangga bo'yaladi */
+        .poem-char {
+            transition: color 0.22s ease, text-shadow 0.22s ease;
+        }
+
+        .poem-char.char-read {
             color: #ff4d4d;
-            text-shadow: 0 0 6px rgba(255, 77, 77, 0.4);
+            text-shadow: 0 0 6px rgba(255, 77, 77, 0.55);
+        }
+
+        /* Oxirida to'liq maktub */
+        .full-letter {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            opacity: 0;
+            transform: translateY(14px);
+            transition: opacity 1s ease, transform 1s ease;
+            text-align: center;
+            font-size: 1rem;
+            line-height: 1.8;
+            color: #f5f0ff;
+        }
+
+        .full-letter.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .letter-card .signature {
-            margin-top: 25px;
-            text-align: right;
+            margin-top: 8px;
+            text-align: center;
             font-family: 'French Script MT', 'Parisienne', cursive;
             font-size: 1.8rem;
             color: #ff758c;
             opacity: 0;
-            transition: opacity 1s ease;
+            transition: opacity 1.2s ease;
         }
 
         .letter-card .signature.visible {
@@ -268,78 +328,114 @@
         <!-- 2-Qism: Portlab ochiladigan Maktub sahifasi -->
         <div class="letter-page" id="letterPage">
             <div class="letter-card" id="letterCard">
-                <h2>Aziz va qadrli insonim,</h2>
-                <div class="letter-text" id="letterText">Bugun sening hayotingdagi eng go'zal va quvonchli kunlardan biri. Hayot yo'ling doimo yorug', omadli va quvonchlarga to'la bo'lishini tilayman. Sen bu dunyodagi eng yaxshi narsalarga loyiqsan.
-
-Yozayotgan bu maktubim qalbimdagi eng samimiy tuyg'ularning kichik bir qismidir. Har bir kuning kulgi, baxt va huzur bilan o'tsin. Oldingga qo'ygan barcha ulug' maqsadlaringga osongina erishishingga tilakdoshman.
-
-Yuzingdan hech qachon tabassum arimasin, qiyinchiliklar seni yanada kuchliroq qilsin, lekin hayotingda ular iloji boricha kamroq bo'lsin. Doimo sog'-salomat bo'l!
-
-Tug'ilgan kuning yana bir bor muborak bo'lsin! 🌟</div>
-                <div class="signature" id="signature">Cheksiz hurmat ila, [Ismingiz]</div>
+                <h2>For someone truly dear,</h2>
+                <div class="letter-text" id="letterText"></div>
+                <div class="signature" id="signature">With endless love and warmth, [Ismingiz]</div>
             </div>
             <button class="back-btn" onclick="closeLetter()">Orqaga qaytish ↩</button>
         </div>
     </div>
 
     <script>
-        // Telefon uchun qotmaydigan maqbul miqdordagi yulduzlar
+        /* ===================== YULDUZLI FON ===================== */
         const starsContainer = document.getElementById('starsContainer');
-        for (let i = 0; i < 45; i++) {
+        const starTints = [
+            { c: '255,255,255' },
+            { c: '255,222,179' },
+            { c: '255,190,214' },
+            { c: '200,220,255' }
+        ];
+
+        for (let i = 0; i < 130; i++) {
+            const dot = document.createElement('div');
+            dot.classList.add('star-dot');
+            dot.style.left = `${Math.random() * 100}%`;
+            dot.style.top = `${Math.random() * 100}%`;
+
+            const size = 1.2 + Math.random() * 2.2;
+            dot.style.width = `${size}px`;
+            dot.style.height = `${size}px`;
+
+            const tint = starTints[Math.floor(Math.random() * starTints.length)].c;
+            dot.style.background = `rgba(${tint}, 1)`;
+            dot.style.boxShadow = `0 0 ${3 + size}px rgba(${tint}, 0.9)`;
+
+            dot.style.setProperty('--duration', `${2.5 + Math.random() * 3.5}s`);
+            dot.style.setProperty('--delay', `${Math.random() * 4}s`);
+            starsContainer.appendChild(dot);
+        }
+
+        for (let i = 0; i < 20; i++) {
             const star = document.createElement('div');
-            star.classList.add('star');
+            star.classList.add('star-sparkle');
             star.style.left = `${Math.random() * 100}%`;
             star.style.top = `${Math.random() * 100}%`;
-            
-            const size = 8 + Math.random() * 10;
+
+            const size = 4 + Math.random() * 7;
             star.style.width = `${size}px`;
             star.style.height = `${size}px`;
-            
+
+            const tint = starTints[Math.floor(Math.random() * starTints.length)].c;
+            star.style.background = `rgba(${tint}, 1)`;
+            star.style.filter = `drop-shadow(0 0 ${4 + size / 2}px rgba(${tint}, 0.9))`;
+
             star.style.setProperty('--duration', `${3 + Math.random() * 3}s`);
+            star.style.setProperty('--delay', `${Math.random() * 4}s`);
             starsContainer.appendChild(star);
         }
 
+        /* ===================== SAHIFA ELEMENTLARI ===================== */
         const welcomePage = document.getElementById('welcomePage');
         const letterPage = document.getElementById('letterPage');
         const openBtn = document.getElementById('openBtn');
         const particlesContainer = document.getElementById('particlesContainer');
         const letterTextElem = document.getElementById('letterText');
-        const letterCard = document.getElementById('letterCard');
         const signatureElem = document.getElementById('signature');
         const bgMusic = document.getElementById('bgMusic');
 
-        const fullText = letterTextElem.innerText;
-        letterTextElem.innerHTML = '';
-        
-        for (let i = 0; i < fullText.length; i++) {
-            const span = document.createElement('span');
-            span.innerText = fullText[i];
-            letterTextElem.appendChild(span);
+        /* ===================== SHE'R MATNI (INGLIZCHA) ===================== */
+        const poemLines = [
+            "Somewhere between yesterday and tomorrow,",
+            "a new year is quietly beginning for you.",
+            "The stars have been waiting all night,",
+            "just to watch this moment arrive.",
+            "May your days ahead be soft with laughter,",
+            "and your nights be full of easy dreams.",
+            "May every hard road you've walked",
+            "lead you somewhere even brighter.",
+            "You are loved more than you know,",
+            "and tonight, the whole sky agrees.",
+            "So breathe it in, this quiet magic —",
+            "happy birthday, dear one. 🌟"
+        ];
+
+        let activeTimeouts = [];
+        function setTO(fn, delay) {
+            const id = setTimeout(fn, delay);
+            activeTimeouts.push(id);
+            return id;
         }
-        const charSpans = letterTextElem.querySelectorAll('span');
+        function clearAllTimeouts() {
+            activeTimeouts.forEach(id => clearTimeout(id));
+            activeTimeouts = [];
+        }
 
-        let isTypingStarted = false;
-        let typingTimeout = null;
-        let userScrolledManually = false;
-
-        // Foydalanuvchi qo'lda skroll qilsa, avtomatik skrollni bezovta qilmasligini aniqlash
-        letterCard.addEventListener('touchstart', () => {
-            userScrolledManually = true;
-        }, { passive: true });
+        let isReading = false;
+        let readingToken = 0;
 
         function createExplosion() {
             const rect = openBtn.getBoundingClientRect();
             const startX = rect.left + rect.width / 2;
             const startY = rect.top + rect.height / 2;
 
-            for (let i = 0; i < 25; i++) { // Telefon uchun optimallashtirilgan zarrachalar soni
+            for (let i = 0; i < 25; i++) {
                 const particle = document.createElement('div');
                 particle.classList.add('particle');
-                
+
                 const size = 4 + Math.random() * 5;
                 particle.style.width = `${size}px`;
                 particle.style.height = `${size}px`;
-                
+
                 const colors = ['#ff7eb3', '#ff758c', '#ffffff', '#ffd700', '#2575fc'];
                 particle.style.background = colors[Math.floor(Math.random() * colors.length)];
 
@@ -357,80 +453,168 @@ Tug'ilgan kuning yana bir bor muborak bo'lsin! 🌟</div>
                 particle.style.animation = `explode 0.7s ease-out forwards`;
                 particlesContainer.appendChild(particle);
 
-                setTimeout(() => {
-                    particle.remove();
-                }, 700);
+                setTimeout(() => particle.remove(), 700);
             }
         }
 
-        function openLetter() {
-            createExplosion(); 
-            
-            bgMusic.volume = 0.4;
+        function fadeInMusic() {
+            bgMusic.volume = 0;
             bgMusic.play().catch(e => console.log("Audio ijro xatosi:", e));
+            let vol = 0;
+            const fade = setInterval(() => {
+                vol += 0.02;
+                if (vol >= 0.32) {
+                    vol = 0.32;
+                    clearInterval(fade);
+                }
+                bgMusic.volume = vol;
+            }, 90);
+        }
+
+        function fadeOutMusic() {
+            let vol = bgMusic.volume;
+            const fade = setInterval(() => {
+                vol -= 0.03;
+                if (vol <= 0) {
+                    vol = 0;
+                    clearInterval(fade);
+                    bgMusic.pause();
+                    bgMusic.currentTime = 0;
+                }
+                bgMusic.volume = vol;
+            }, 60);
+        }
+
+        function openLetter() {
+            createExplosion();
+            fadeInMusic();
 
             setTimeout(() => {
                 welcomePage.classList.add('hidden');
                 letterPage.classList.add('active');
 
-                if (!isTypingStarted) {
-                    isTypingStarted = true;
-                    userScrolledManually = false;
-                    typingTimeout = setTimeout(startReadingEffect, 5000);
+                if (!isReading) {
+                    isReading = true;
+                    setTO(() => startReadingEffect(readingToken), 1200);
                 }
             }, 200);
         }
 
-        function startReadingEffect() {
-            let currentIndex = 0;
-            
-            function typeNextChar() {
-                if (currentIndex < charSpans.length) {
-                    const currentSpan = charSpans[currentIndex];
-                    const currentChar = currentSpan.innerText;
-                    
-                    currentSpan.classList.add('read-text');
-                    
-                    // Matn qayerda o'qilayotganini ko'rsatish uchun silliq markazga olish (Foydalanuvchi qo'lda skroll qilmagan bo'lsa)
-                    if (!userScrolledManually) {
-                        currentSpan.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'center'
-                        });
-                    }
+        function buildLine(text) {
+            const lineEl = document.createElement('div');
+            lineEl.classList.add('poem-line');
 
-                    currentIndex++;
-
-                    let nextSpeed = 50; // Normal o'qish tezligi
-
-                    if (currentChar === '\n') {
-                        nextSpeed = 1500; // Paragraf tugaganda insoniy nafas olish pauzasi
-                    } else if (currentChar === '.' || currentChar === '!') {
-                        nextSpeed = 450;  // Gap tugaganda kichik to'xtalish
-                    }
-
-                    typingTimeout = setTimeout(typeNextChar, nextSpeed);
-                } else {
-                    signatureElem.classList.add('visible');
-                    if (!userScrolledManually) {
-                        signatureElem.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
-                }
+            const spans = [];
+            for (const ch of text) {
+                const span = document.createElement('span');
+                span.classList.add('poem-char');
+                span.textContent = ch;
+                lineEl.appendChild(span);
+                spans.push(span);
             }
 
-            typeNextChar();
+            letterTextElem.innerHTML = '';
+            letterTextElem.appendChild(lineEl);
+            return { lineEl, spans };
+        }
+
+        function showFullLetter(token) {
+            const wrap = document.createElement('div');
+            wrap.classList.add('full-letter');
+            poemLines.forEach(line => {
+                const p = document.createElement('div');
+                p.textContent = line;
+                wrap.appendChild(p);
+            });
+
+            letterTextElem.innerHTML = '';
+            letterTextElem.appendChild(wrap);
+
+            requestAnimationFrame(() => {
+                setTO(() => {
+                    if (token !== readingToken) return;
+                    wrap.classList.add('visible');
+                }, 30);
+            });
+
+            setTO(() => {
+                if (token !== readingToken) return;
+                signatureElem.classList.add('visible');
+            }, 1300);
+        }
+
+        function startReadingEffect(token) {
+            let index = 0;
+
+            function playLine() {
+                if (token !== readingToken) return;
+
+                if (index >= poemLines.length) {
+                    setTO(() => showFullLetter(token), 300);
+                    return;
+                }
+
+                const { lineEl, spans } = buildLine(poemLines[index]);
+
+                // Gap teng ravishda, silliq paydo bo'ladi (bachkana emas)
+                requestAnimationFrame(() => {
+                    setTO(() => {
+                        if (token !== readingToken) return;
+                        lineEl.classList.add('line-visible');
+                    }, 30);
+                });
+
+                const entranceDuration = 780;
+
+                setTO(() => {
+                    if (token !== readingToken) return;
+                    let i = 0;
+
+                    function nextChar() {
+                        if (token !== readingToken) return;
+
+                        if (i < spans.length) {
+                            spans[i].classList.add('char-read');
+                            const ch = spans[i].textContent;
+                            i++;
+
+                            let speed = 42; // normal o'qish tezligi, harf-baharf chapdan o'ngga
+                            if (ch === '.' || ch === '!' || ch === ',' || ch === '—') {
+                                speed = 360;
+                            }
+
+                            setTO(nextChar, speed);
+                        } else {
+                            // Gap to'liq o'qildi — biroz ushlab turib, teng ravishda yo'qoladi
+                            setTO(() => {
+                                if (token !== readingToken) return;
+                                lineEl.classList.remove('line-visible');
+                                lineEl.classList.add('line-exit');
+                            }, 900);
+
+                            setTO(() => {
+                                if (token !== readingToken) return;
+                                index++;
+                                playLine();
+                            }, 900 + 780);
+                        }
+                    }
+
+                    nextChar();
+                }, entranceDuration);
+            }
+
+            playLine();
         }
 
         function closeLetter() {
-            clearTimeout(typingTimeout);
-            isTypingStarted = false;
-            userScrolledManually = false;
-            charSpans.forEach(span => span.classList.remove('read-text'));
+            readingToken++;
+            clearAllTimeouts();
+            isReading = false;
+            letterTextElem.innerHTML = '';
             signatureElem.classList.remove('visible');
-            letterCard.scrollTop = 0;
 
-            bgMusic.pause();
-            bgMusic.currentTime = 0;
+            fadeOutMusic();
 
             welcomePage.classList.remove('hidden');
             letterPage.classList.remove('active');
