@@ -294,6 +294,48 @@
             will-change: transform, opacity;
         }
 
+        /* Diagnostika elementlari */
+        .audio-status {
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.68rem;
+            color: rgba(255, 255, 255, 0.55);
+            background: rgba(0, 0, 0, 0.35);
+            padding: 5px 12px;
+            border-radius: 10px;
+            z-index: 50;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+            max-width: 90%;
+            text-align: center;
+        }
+        .audio-status.show {
+            opacity: 1;
+        }
+
+        .sound-btn {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            border-radius: 30px;
+            box-shadow: 0 6px 16px rgba(37, 117, 252, 0.45);
+            z-index: 51;
+            display: none;
+            cursor: pointer;
+        }
+        .sound-btn.show {
+            display: block;
+        }
+
         @keyframes explode {
             0% {
                 transform: translate(0, 0) scale(1);
@@ -309,9 +351,13 @@
 <body>
 
     <!-- Sokin fon musiqasi -->
-    <audio id="bgMusic" loop>
-        <source src="https://actions.google.com/sounds/v1/relax/meditation.ogg" type="audio/ogg">
+    <audio id="bgMusic" loop preload="auto" playsinline>
+        <source src="./nma.m4a" type="audio/mp4">
     </audio>
+
+    <!-- Diagnostika: audio holati va zaxira "Ovozni yoqish" tugmasi -->
+    <div class="audio-status" id="audioStatus"></div>
+    <button class="sound-btn" id="soundBtn" onclick="enableSoundManually()">🔊 Ovozni yoqish</button>
 
     <!-- Yulduzlar konteyneri -->
     <div class="stars" id="starsContainer"></div>
@@ -457,18 +503,76 @@
             }
         }
 
-        function fadeInMusic() {
-            bgMusic.volume = 0;
-            bgMusic.play().catch(e => console.log("Audio ijro xatosi:", e));
+        /* ===================== AUDIO DIAGNOSTIKASI ===================== */
+        const audioStatus = document.getElementById('audioStatus');
+        const soundBtn = document.getElementById('soundBtn');
+        let statusHideTO = null;
+
+        function setStatus(msg, autoHide) {
+            audioStatus.textContent = msg;
+            audioStatus.classList.add('show');
+            console.log('[Audio debug]', msg);
+            clearTimeout(statusHideTO);
+            if (autoHide) {
+                statusHideTO = setTimeout(() => audioStatus.classList.remove('show'), 3500);
+            }
+        }
+
+        // Fayl umuman yuklanmasa yoki dekodlanmasa — aniq sababini ko'rsatamiz
+        bgMusic.addEventListener('error', () => {
+            const err = bgMusic.error;
+            let reason = 'Noma\'lum xatolik';
+            if (err) {
+                switch (err.code) {
+                    case 1: reason = 'Yuklash to\'xtatildi (ABORTED)'; break;
+                    case 2: reason = 'Tarmoq xatosi: bgmusic.m4a topilmadi yoki yuklanmadi (fayl index.html bilan bir papkadamasmi, tekshiring)'; break;
+                    case 3: reason = 'Fayl dekodlab bo\'lmadi (DECODE_ERROR) — m4a buzilgan bo\'lishi mumkin'; break;
+                    case 4: reason = 'Manba qo\'llab-quvvatlanmaydi (SRC_NOT_SUPPORTED) — bgmusic.m4a shu papkada yo\'q yoki brauzer ochib bera olmayapti'; break;
+                }
+            }
+            setStatus('❌ ' + reason, false);
+            soundBtn.classList.add('show');
+        });
+
+        function rampVolume() {
             let vol = 0;
+            bgMusic.volume = 0;
             const fade = setInterval(() => {
-                vol += 0.02;
-                if (vol >= 0.32) {
-                    vol = 0.32;
+                vol += 0.005;
+                if (vol >= 0.09) {
+                    vol = 0.09;
                     clearInterval(fade);
                 }
-                bgMusic.volume = vol;
-            }, 90);
+                try { bgMusic.volume = vol; } catch (e) { clearInterval(fade); }
+            }, 140);
+        }
+
+        function fadeInMusic() {
+            bgMusic.volume = 0;
+            const playPromise = bgMusic.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    setStatus('✅ Musiqa ijro etilmoqda', true);
+                    soundBtn.classList.remove('show');
+                    rampVolume();
+                }).catch(err => {
+                    // Autoplay bloklandi — sababini aniq ko'rsatamiz va qo'lda yoqish tugmasini chiqaramiz
+                    setStatus('⚠️ Avtomatik ijro bloklandi: ' + err.name + ' — "Ovozni yoqish" tugmasini bosing', false);
+                    soundBtn.classList.add('show');
+                });
+            } else {
+                rampVolume();
+            }
+        }
+
+        function enableSoundManually() {
+            bgMusic.volume = 0.09;
+            bgMusic.play().then(() => {
+                setStatus('✅ Musiqa ijro etilmoqda', true);
+                soundBtn.classList.remove('show');
+            }).catch(err => {
+                setStatus('❌ Baribir ishlamadi: ' + err.name + ' — ' + err.message, false);
+            });
         }
 
         function fadeOutMusic() {
@@ -481,7 +585,7 @@
                     bgMusic.pause();
                     bgMusic.currentTime = 0;
                 }
-                bgMusic.volume = vol;
+                try { bgMusic.volume = vol; } catch (e) { clearInterval(fade); bgMusic.pause(); }
             }, 60);
         }
 
