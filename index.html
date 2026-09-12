@@ -2,7 +2,7 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Tug'ilgan kuningiz muborak bo'lsin!</title>
     <!-- Google Fonts: Kalligrafik shriftlar -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Parisienne&display=swap" rel="stylesheet">
@@ -12,21 +12,24 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             background-color: #02020a;
             color: #ffffff;
             font-family: 'Poppins', sans-serif;
-            min-height: 100vh;
+            height: 100vh;
+            height: 100dvh;
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            position: relative;
+            position: fixed;
+            width: 100%;
         }
 
-        /* Yulduzlar uchun fon (Kattaroq, aniqroq va har xil o'lchamda) */
+        /* Yulduzlar uchun fon (Telefon uchun optimallashtirilgan) */
         .stars {
             position: absolute;
             top: 0;
@@ -40,19 +43,28 @@
         .star {
             position: absolute;
             background: #ffffff;
-            border-radius: 50%;
+            clip-path: polygon(
+                35% 0%, 65% 0%, 
+                65% 35%, 100% 35%, 
+                100% 65%, 65% 65%, 
+                65% 100%, 35% 100%, 
+                35% 65%, 0% 65%, 
+                0% 35%, 35% 35%
+            );
             box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
             animation: pulseStar var(--duration) infinite ease-in-out;
+            will-change: transform, opacity;
+            transform: translateZ(0);
         }
 
         @keyframes pulseStar {
             0%, 100% { 
-                opacity: 0.3; 
-                transform: scale(0.6); 
+                opacity: 0.2; 
+                transform: scale(0.4) rotate(0deg); 
             }
             50% { 
                 opacity: 1; 
-                transform: scale(1.4); 
+                transform: scale(1.2) rotate(45deg); 
                 box-shadow: 0 0 12px rgba(255, 255, 255, 1);
             }
         }
@@ -62,14 +74,14 @@
             position: relative;
             z-index: 2;
             text-align: center;
-            padding: 20px;
-            max-width: 700px;
+            padding: 15px;
+            max-width: 600px;
             width: 100%;
         }
 
         /* 1-sahifa: Asosiy kirish qismi */
         .welcome-page {
-            transition: all 0.6s ease;
+            transition: all 0.5s ease;
         }
 
         .welcome-page.hidden {
@@ -81,18 +93,19 @@
         }
 
         h1 {
-            font-size: 2.8rem;
-            margin-bottom: 15px;
+            font-size: 2.2rem;
+            margin-bottom: 12px;
             background: linear-gradient(45deg, #ff758c, #ff7eb3);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 20px rgba(255, 117, 140, 0.3);
+            text-shadow: 0 0 15px rgba(255, 117, 140, 0.3);
         }
 
         p.subtitle {
-            font-size: 1.1rem;
+            font-size: 1rem;
             color: #b8b8d0;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
+            padding: 0 10px;
         }
 
         /* Chiroyli tugma */
@@ -100,22 +113,21 @@
             background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
             color: white;
             border: none;
-            padding: 15px 35px;
-            font-size: 1.1rem;
+            padding: 14px 30px;
+            font-size: 1.05rem;
             font-weight: 600;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 10px 25px rgba(37, 117, 252, 0.4);
+            box-shadow: 0 8px 20px rgba(37, 117, 252, 0.4);
             transition: all 0.3s ease;
             outline: none;
         }
 
-        .magic-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 30px rgba(37, 117, 252, 0.6);
+        .magic-btn:active {
+            transform: scale(0.95);
         }
 
-        /* 2-sahifa: Portlab chiqadigan Maktub qismi */
+        /* 2-sahifa: Maktub qismi */
         .letter-page {
             position: absolute;
             top: 50%;
@@ -123,9 +135,9 @@
             transform: translate(-50%, -50%) scale(0);
             opacity: 0;
             pointer-events: none;
-            transition: all 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            width: 90%;
-            max-width: 650px;
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            width: 92%;
+            max-width: 550px;
         }
 
         .letter-page.active {
@@ -135,21 +147,23 @@
         }
 
         .letter-card {
-            background: rgba(12, 12, 28, 0.94);
-            backdrop-filter: blur(15px);
+            background: rgba(12, 12, 28, 0.96);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 117, 140, 0.3);
-            padding: 40px;
-            border-radius: 25px;
-            box-shadow: 0 0 50px rgba(255, 117, 140, 0.2), 0 20px 40px rgba(0, 0, 0, 0.6);
+            padding: 25px 20px;
+            border-radius: 20px;
+            box-shadow: 0 0 40px rgba(255, 117, 140, 0.15), 0 15px 30px rgba(0, 0, 0, 0.5);
             text-align: left;
             position: relative;
-            max-height: 75vh;
-            overflow-y: auto; /* Matn uzun bo'lsa skroll qilish uchun */
+            max-height: 72vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch; /* Telefon uchun silliq skroll */
         }
 
-        /* Skrollni chiroyli qilish */
+        /* Skrollnari chiroyli qilish */
         .letter-card::-webkit-scrollbar {
-            width: 6px;
+            width: 4px;
         }
         .letter-card::-webkit-scrollbar-thumb {
             background: rgba(255, 117, 140, 0.4);
@@ -158,33 +172,33 @@
 
         .letter-card h2 {
             font-family: 'French Script MT', 'Parisienne', cursive;
-            font-size: 3.5rem;
+            font-size: 2.8rem;
             color: #ff7eb3;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             text-align: center;
             font-weight: normal;
-            text-shadow: 0 0 10px rgba(255, 126, 179, 0.4);
+            text-shadow: 0 0 8px rgba(255, 126, 179, 0.4);
         }
 
         .letter-text {
-            font-size: 1.1rem;
-            line-height: 1.9;
-            color: #ffffff; /* Hali o'qilmagan matn oq rangda */
+            font-size: 1rem;
+            line-height: 1.8;
+            color: #ffffff;
             margin-bottom: 20px;
             white-space: pre-wrap;
         }
 
-        /* Ortda qolgan (o'qib bo'lingan) harflar qizil rangda bo'ladi */
+        /* O'qib bo'lingan qizil iz */
         .read-text {
             color: #ff4d4d;
-            text-shadow: 0 0 8px rgba(255, 77, 77, 0.4);
+            text-shadow: 0 0 6px rgba(255, 77, 77, 0.4);
         }
 
         .letter-card .signature {
-            margin-top: 30px;
+            margin-top: 25px;
             text-align: right;
             font-family: 'French Script MT', 'Parisienne', cursive;
-            font-size: 2rem;
+            font-size: 1.8rem;
             color: #ff758c;
             opacity: 0;
             transition: opacity 1s ease;
@@ -198,20 +212,15 @@
             background: transparent;
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: #b8b8d0;
-            padding: 8px 20px;
-            font-size: 0.9rem;
+            padding: 8px 18px;
+            font-size: 0.85rem;
             border-radius: 20px;
             cursor: pointer;
-            margin-top: 20px;
+            margin-top: 15px;
             transition: 0.3s;
             display: block;
             margin-left: auto;
             margin-right: auto;
-        }
-
-        .back-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
         }
 
         /* Portlash zarralari */
@@ -222,6 +231,7 @@
             pointer-events: none;
             opacity: 0;
             z-index: 3;
+            will-change: transform, opacity;
         }
 
         @keyframes explode {
@@ -238,7 +248,7 @@
 </head>
 <body>
 
-    <!-- Sokin fon musiqasi (Royalty-free ambient sound) -->
+    <!-- Sokin fon musiqasi -->
     <audio id="bgMusic" loop>
         <source src="https://actions.google.com/sounds/v1/relax/meditation.ogg" type="audio/ogg">
     </audio>
@@ -273,21 +283,19 @@ Tug'ilgan kuning yana bir bor muborak bo'lsin! 🌟</div>
     </div>
 
     <script>
-        // Dinamik fon yulduzlarini hosil qilish (Kattaroq va har xil o'lchamda)
+        // Telefon uchun qotmaydigan maqbul miqdordagi yulduzlar
         const starsContainer = document.getElementById('starsContainer');
-        for (let i = 0; i < 90; i++) {
+        for (let i = 0; i < 45; i++) {
             const star = document.createElement('div');
             star.classList.add('star');
             star.style.left = `${Math.random() * 100}%`;
             star.style.top = `${Math.random() * 100}%`;
             
-            // O'lchamlari har xil (3px dan 8px gacha - kattaroq va aniqroq)
-            const size = 3 + Math.random() * 5;
+            const size = 8 + Math.random() * 10;
             star.style.width = `${size}px`;
             star.style.height = `${size}px`;
             
-            // Animatsiya vaqti har xil
-            star.style.setProperty('--duration', `${2.5 + Math.random() * 3.5}s`);
+            star.style.setProperty('--duration', `${3 + Math.random() * 3}s`);
             starsContainer.appendChild(star);
         }
 
@@ -300,11 +308,9 @@ Tug'ilgan kuning yana bir bor muborak bo'lsin! 🌟</div>
         const signatureElem = document.getElementById('signature');
         const bgMusic = document.getElementById('bgMusic');
 
-        // Asl matnni saqlab qo'yamiz va bo'shatamiz
         const fullText = letterTextElem.innerText;
         letterTextElem.innerHTML = '';
         
-        // Harflarni va bo'shliqlarni alohida span elementlarga bo'lib chiqamiz
         for (let i = 0; i < fullText.length; i++) {
             const span = document.createElement('span');
             span.innerText = fullText[i];
@@ -314,17 +320,23 @@ Tug'ilgan kuning yana bir bor muborak bo'lsin! 🌟</div>
 
         let isTypingStarted = false;
         let typingTimeout = null;
+        let userScrolledManually = false;
+
+        // Foydalanuvchi qo'lda skroll qilsa, avtomatik skrollni bezovta qilmasligini aniqlash
+        letterCard.addEventListener('touchstart', () => {
+            userScrolledManually = true;
+        }, { passive: true });
 
         function createExplosion() {
             const rect = openBtn.getBoundingClientRect();
             const startX = rect.left + rect.width / 2;
             const startY = rect.top + rect.height / 2;
 
-            for (let i = 0; i < 40; i++) {
+            for (let i = 0; i < 25; i++) { // Telefon uchun optimallashtirilgan zarrachalar soni
                 const particle = document.createElement('div');
                 particle.classList.add('particle');
                 
-                const size = 5 + Math.random() * 6;
+                const size = 4 + Math.random() * 5;
                 particle.style.width = `${size}px`;
                 particle.style.height = `${size}px`;
                 
@@ -335,36 +347,35 @@ Tug'ilgan kuning yana bir bor muborak bo'lsin! 🌟</div>
                 particle.style.top = `${startY}px`;
 
                 const angle = Math.random() * Math.PI * 2;
-                const distance = 90 + Math.random() * 210;
+                const distance = 70 + Math.random() * 150;
                 const tx = Math.cos(angle) * distance;
                 const ty = Math.sin(angle) * distance;
 
                 particle.style.setProperty('--tx', `${tx}px`);
                 particle.style.setProperty('--ty', `${ty}px`);
 
-                particle.style.animation = `explode 0.8s ease-out forwards`;
+                particle.style.animation = `explode 0.7s ease-out forwards`;
                 particlesContainer.appendChild(particle);
 
                 setTimeout(() => {
                     particle.remove();
-                }, 800);
+                }, 700);
             }
         }
 
         function openLetter() {
             createExplosion(); 
             
-            // Orqaga fon musiqasini yoqish
             bgMusic.volume = 0.4;
-            bgMusic.play().catch(e => console.log("Audio ijro etishda xatolik:", e));
+            bgMusic.play().catch(e => console.log("Audio ijro xatosi:", e));
 
             setTimeout(() => {
                 welcomePage.classList.add('hidden');
                 letterPage.classList.add('active');
 
-                // Maktub ochilgandan 5 soniya o'tgach o'qilishni boshlash
                 if (!isTypingStarted) {
                     isTypingStarted = true;
+                    userScrolledManually = false;
                     typingTimeout = setTimeout(startReadingEffect, 5000);
                 }
             }, 200);
@@ -375,31 +386,35 @@ Tug'ilgan kuning yana bir bor muborak bo'lsin! 🌟</div>
             
             function typeNextChar() {
                 if (currentIndex < charSpans.length) {
-                    const currentChar = charSpans[currentIndex].innerText;
+                    const currentSpan = charSpans[currentIndex];
+                    const currentChar = currentSpan.innerText;
                     
-                    // O'qib bo'lingan harfga qizil rang beramiz
-                    charSpans[currentIndex].classList.add('read-text');
+                    currentSpan.classList.add('read-text');
                     
-                    // Skrollni avtomatik pastga tushirib borish
-                    letterCard.scrollTop = letterCard.scrollHeight;
+                    // Matn qayerda o'qilayotganini ko'rsatish uchun silliq markazga olish (Foydalanuvchi qo'lda skroll qilmagan bo'lsa)
+                    if (!userScrolledManually) {
+                        currentSpan.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+                    }
 
                     currentIndex++;
 
-                    // Oddiy harflar uchun o'qish tezligi (biroz sekinroq, 55ms)
-                    let nextSpeed = 55;
+                    let nextSpeed = 50; // Normal o'qish tezligi
 
-                    // Agar paragraf oxiri (\n yoki nuqta) bo'lsa, insoniy pauza qo'shamiz (1.5 - 2 sekund)
                     if (currentChar === '\n') {
-                        nextSpeed = 1600; // Paragraf orasidagi tin olish pauzasi
+                        nextSpeed = 1500; // Paragraf tugaganda insoniy nafas olish pauzasi
                     } else if (currentChar === '.' || currentChar === '!') {
-                        nextSpeed = 500;  // Gap tugaganda kichik pauza
+                        nextSpeed = 450;  // Gap tugaganda kichik to'xtalish
                     }
 
                     typingTimeout = setTimeout(typeNextChar, nextSpeed);
                 } else {
-                    // Matn tugagach imzoni ko'rsatish
                     signatureElem.classList.add('visible');
-                    letterCard.scrollTop = letterCard.scrollHeight;
+                    if (!userScrolledManually) {
+                        signatureElem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
                 }
             }
 
@@ -407,9 +422,9 @@ Tug'ilgan kuning yana bir bor muborak bo'lsin! 🌟</div>
         }
 
         function closeLetter() {
-            // Orqaga qaytsa animatsiya va musiqani to'xtatish
             clearTimeout(typingTimeout);
             isTypingStarted = false;
+            userScrolledManually = false;
             charSpans.forEach(span => span.classList.remove('read-text'));
             signatureElem.classList.remove('visible');
             letterCard.scrollTop = 0;
