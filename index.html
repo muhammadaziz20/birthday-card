@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="color-scheme" content="dark">
     <title>Tug'ilgan kuningiz muborak bo'lsin!</title>
     <!-- Google Fonts: Kalligrafik shriftlar -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Parisienne&display=swap" rel="stylesheet">
@@ -15,8 +16,13 @@
             -webkit-tap-highlight-color: transparent;
         }
 
+        html {
+            background-color: #060b28;
+        }
+
         body {
-            background-color: #02020a;
+            background-color: #060b28;
+            background-image: radial-gradient(ellipse at 50% 15%, #1b2d6e 0%, #0d1846 45%, #05081f 100%);
             color: #ffffff;
             font-family: 'Poppins', sans-serif;
             height: 100vh;
@@ -194,10 +200,12 @@
 
         /* She'r/matn ko'rinadigan hudud */
         .letter-text {
-            min-height: 110px;
+            min-height: 150px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+            gap: 16px;
             flex-wrap: wrap;
             font-size: 1.15rem;
             line-height: 1.9;
@@ -239,13 +247,14 @@
         .full-letter {
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: 16px;
             opacity: 0;
             transform: translateY(14px);
             transition: opacity 1s ease, transform 1s ease;
             text-align: center;
-            font-size: 1rem;
-            line-height: 1.8;
+            font-family: 'French Script MT', 'Parisienne', cursive;
+            font-size: 1.5rem;
+            line-height: 1.6;
             color: #f5f0ff;
         }
 
@@ -352,7 +361,7 @@
 
     <!-- Sokin fon musiqasi -->
     <audio id="bgMusic" loop preload="auto" playsinline>
-        <source src="./nma.m4a" type="audio/mp4">
+        <source src="./0913.m4a" type="audio/mp4">
     </audio>
 
     <!-- Diagnostika: audio holati va zaxira "Ovozni yoqish" tugmasi -->
@@ -436,6 +445,7 @@
         const openBtn = document.getElementById('openBtn');
         const particlesContainer = document.getElementById('particlesContainer');
         const letterTextElem = document.getElementById('letterText');
+        const letterCardElem = document.getElementById('letterCard');
         const signatureElem = document.getElementById('signature');
         const bgMusic = document.getElementById('bgMusic');
 
@@ -538,36 +548,52 @@
             let vol = 0;
             bgMusic.volume = 0;
             const fade = setInterval(() => {
-                vol += 0.005;
-                if (vol >= 0.09) {
-                    vol = 0.09;
+                vol += 0.006;
+                if (vol >= 0.14) {
+                    vol = 0.14;
                     clearInterval(fade);
                 }
                 try { bgMusic.volume = vol; } catch (e) { clearInterval(fade); }
             }, 140);
         }
 
-        function fadeInMusic() {
+        let musicStarted = false;
+
+        function tryStartMusic() {
+            if (musicStarted) return;
             bgMusic.volume = 0;
             const playPromise = bgMusic.play();
             if (playPromise !== undefined) {
                 playPromise.then(() => {
+                    musicStarted = true;
                     setStatus('✅ Musiqa ijro etilmoqda', true);
                     soundBtn.classList.remove('show');
                     rampVolume();
                 }).catch(err => {
-                    // Autoplay bloklandi — sababini aniq ko'rsatamiz va qo'lda yoqish tugmasini chiqaramiz
-                    setStatus('⚠️ Avtomatik ijro bloklandi: ' + err.name + ' — "Ovozni yoqish" tugmasini bosing', false);
+                    // Avtoplay bloklandi — birinchi bosish/teginish orqali qayta urinamiz
+                    setStatus('⚠️ Avtomatik ijro bloklandi: ' + err.name + ' — birinchi bosishda yoqiladi', false);
                     soundBtn.classList.add('show');
                 });
             } else {
+                musicStarted = true;
                 rampVolume();
             }
         }
 
+        // Dastur ochilishi bilanoq musiqani boshlashga urinamiz
+        tryStartMusic();
+
+        // Brauzer avtoplayni bloklasa, foydalanuvchining birinchi teginishi/bosishida yoqiladi
+        ['click', 'touchstart', 'keydown'].forEach(evt => {
+            document.addEventListener(evt, function onFirstInteract() {
+                tryStartMusic();
+            }, { once: true, passive: true });
+        });
+
         function enableSoundManually() {
-            bgMusic.volume = 0.09;
+            bgMusic.volume = 0.14;
             bgMusic.play().then(() => {
+                musicStarted = true;
                 setStatus('✅ Musiqa ijro etilmoqda', true);
                 soundBtn.classList.remove('show');
             }).catch(err => {
@@ -591,7 +617,6 @@
 
         function openLetter() {
             createExplosion();
-            fadeInMusic();
 
             setTimeout(() => {
                 welcomePage.classList.add('hidden');
@@ -617,7 +642,6 @@
                 spans.push(span);
             }
 
-            letterTextElem.innerHTML = '';
             letterTextElem.appendChild(lineEl);
             return { lineEl, spans };
         }
@@ -644,21 +668,80 @@
             setTO(() => {
                 if (token !== readingToken) return;
                 signatureElem.classList.add('visible');
+
+                // Imzo ko'rinishi uchun bir martalik, silliq tarzda pastga tushamiz.
+                // Bu faqat shu paytda sodir bo'ladi — foydalanuvchi keyin tepaga qaytarishi mumkin,
+                // hech qanday keyingi majburiy scroll yo'q.
+                if (letterCardElem) {
+                    letterCardElem.scrollTo({ top: letterCardElem.scrollHeight, behavior: 'smooth' });
+                }
             }, 1300);
         }
 
         function startReadingEffect(token) {
-            let index = 0;
+            const displayed = []; // hozir ekranda turgan qatorlar (eng ko'pi bilan 2 tasi)
 
-            function playLine() {
+            function revealChars(spans, onDone) {
+                let i = 0;
+                function nextChar() {
+                    if (token !== readingToken) return;
+
+                    if (i < spans.length) {
+                        spans[i].classList.add('char-read');
+                        const ch = spans[i].textContent;
+                        i++;
+
+                        let speed = 42; // normal o'qish tezligi, harf-baharf chapdan o'ngga
+                        if (ch === '.' || ch === '!' || ch === ',' || ch === '—') {
+                            speed = 360;
+                        }
+
+                        setTO(nextChar, speed);
+                    } else {
+                        onDone();
+                    }
+                }
+                nextChar();
+            }
+
+            function removeLine(lineObj) {
+                if (!lineObj) return;
+                lineObj.el.classList.remove('line-visible');
+                lineObj.el.classList.add('line-exit');
+                setTO(() => {
+                    const siblings = Array.from(letterTextElem.querySelectorAll('.poem-line')).filter(el => el !== lineObj.el);
+                    const firstRects = siblings.map(el => el.getBoundingClientRect());
+
+                    if (lineObj.el.parentNode) lineObj.el.remove();
+
+                    // FLIP: qolgan qator(lar) bo'shagan joyga yengil, smooth tarzda ko'tariladi
+                    siblings.forEach((el, idx) => {
+                        const lastRect = el.getBoundingClientRect();
+                        const deltaY = firstRects[idx].top - lastRect.top;
+                        if (Math.abs(deltaY) > 0.5) {
+                            el.style.transition = 'none';
+                            el.style.transform = `translateY(${deltaY}px)`;
+                            requestAnimationFrame(() => {
+                                requestAnimationFrame(() => {
+                                    el.style.transition = 'transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)';
+                                    el.style.transform = 'translateY(0)';
+                                });
+                            });
+                            setTimeout(() => {
+                                el.style.transition = '';
+                                el.style.transform = '';
+                            }, 700);
+                        }
+                    });
+                }, 750);
+            }
+
+            function addLine(i) {
                 if (token !== readingToken) return;
 
-                if (index >= poemLines.length) {
-                    setTO(() => showFullLetter(token), 300);
-                    return;
-                }
-
-                const { lineEl, spans } = buildLine(poemLines[index]);
+                const { lineEl, spans } = buildLine(poemLines[i]);
+                const lineObj = { el: lineEl, spans };
+                displayed.push(lineObj);
 
                 // Gap teng ravishda, silliq paydo bo'ladi (bachkana emas)
                 requestAnimationFrame(() => {
@@ -672,43 +755,36 @@
 
                 setTO(() => {
                     if (token !== readingToken) return;
-                    let i = 0;
-
-                    function nextChar() {
-                        if (token !== readingToken) return;
-
-                        if (i < spans.length) {
-                            spans[i].classList.add('char-read');
-                            const ch = spans[i].textContent;
-                            i++;
-
-                            let speed = 42; // normal o'qish tezligi, harf-baharf chapdan o'ngga
-                            if (ch === '.' || ch === '!' || ch === ',' || ch === '—') {
-                                speed = 360;
-                            }
-
-                            setTO(nextChar, speed);
-                        } else {
-                            // Gap to'liq o'qildi — biroz ushlab turib, teng ravishda yo'qoladi
-                            setTO(() => {
-                                if (token !== readingToken) return;
-                                lineEl.classList.remove('line-visible');
-                                lineEl.classList.add('line-exit');
-                            }, 900);
-
-                            setTO(() => {
-                                if (token !== readingToken) return;
-                                index++;
-                                playLine();
-                            }, 900 + 780);
-                        }
-                    }
-
-                    nextChar();
+                    revealChars(spans, () => onLineFullyRead(i));
                 }, entranceDuration);
             }
 
-            playLine();
+            function onLineFullyRead(i) {
+                if (token !== readingToken) return;
+
+                // Gap to'liq o'qildi — biroz ushlab turamiz, shu payt ikkinchi qator ham shu yerda turadi
+                setTO(() => {
+                    if (token !== readingToken) return;
+
+                    // Bittadan oldingi (eski, allaqachon o'qilgan) qator endi yo'qoladi
+                    if (i >= 1) {
+                        removeLine(displayed.shift());
+                    }
+
+                    if (i + 1 < poemLines.length) {
+                        addLine(i + 1);
+                    } else {
+                        // She'r tugadi — qolgan qator ham biroz turib, keyin to'liq maktub chiqadi
+                        setTO(() => {
+                            if (token !== readingToken) return;
+                            displayed.forEach(d => removeLine(d));
+                            setTO(() => showFullLetter(token), 750);
+                        }, 1300);
+                    }
+                }, 900);
+            }
+
+            addLine(0);
         }
 
         function closeLetter() {
