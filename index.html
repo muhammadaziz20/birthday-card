@@ -2,7 +2,7 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="color-scheme" content="dark">
     <title>Tug'ilgan kuningiz muborak bo'lsin!</title>
     <!-- Google Fonts: Kalligrafik shriftlar -->
@@ -52,7 +52,6 @@
             border-radius: 50%;
             animation: dotTwinkle var(--duration) infinite ease-in-out;
             animation-delay: var(--delay);
-            will-change: transform, opacity;
             transform: translateZ(0);
         }
 
@@ -80,11 +79,11 @@
         @keyframes sparkleTwinkle {
             0%, 100% {
                 opacity: 0.25;
-                transform: scale(0.5) rotate(0deg);
+                transform: scale(0.5);
             }
             50% {
                 opacity: 1;
-                transform: scale(1.05) rotate(25deg);
+                transform: scale(1.1);
             }
         }
 
@@ -100,7 +99,7 @@
 
         /* 1-sahifa: Asosiy kirish qismi */
         .welcome-page {
-            transition: all 0.5s ease;
+            transition: opacity 0.5s ease, transform 0.5s ease;
         }
 
         .welcome-page.hidden {
@@ -154,7 +153,7 @@
             transform: translate(-50%, -50%) scale(0);
             opacity: 0;
             pointer-events: none;
-            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: opacity 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             width: 92%;
             max-width: 550px;
         }
@@ -166,9 +165,7 @@
         }
 
         .letter-card {
-            background: rgba(12, 12, 28, 0.96);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            background: rgba(10, 10, 24, 0.98);
             border: 1px solid rgba(255, 117, 140, 0.3);
             padding: 30px 20px;
             border-radius: 20px;
@@ -200,15 +197,14 @@
 
         /* She'r/matn ko'rinadigan hudud */
         .letter-text {
-            min-height: 150px;
+            min-height: 110px;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 16px;
             flex-wrap: wrap;
-            font-size: 1.15rem;
-            line-height: 1.9;
+            font-family: 'French Script MT', 'Parisienne', cursive;
+            font-size: 1.4rem;
+            line-height: 1.8;
             color: #f5f0ff;
             margin-bottom: 10px;
             padding: 10px 4px;
@@ -286,10 +282,42 @@
             border-radius: 20px;
             cursor: pointer;
             margin-top: 15px;
-            transition: 0.3s;
+            margin-bottom: max(4px, env(safe-area-inset-bottom));
+            transition: transform 0.3s ease, background 0.3s ease;
             display: block;
             margin-left: auto;
             margin-right: auto;
+        }
+
+        /* Kichik ekranli telefonlar uchun (masalan, iPhone SE va shunga o'xshash) */
+        @media (max-width: 360px), (max-height: 640px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            p.subtitle {
+                font-size: 0.9rem;
+            }
+            .magic-btn {
+                padding: 12px 24px;
+                font-size: 0.95rem;
+            }
+            .letter-card h2 {
+                font-size: 2rem;
+            }
+            .letter-text {
+                font-size: 1.15rem;
+                min-height: 90px;
+            }
+            .full-letter {
+                font-size: 1.2rem;
+            }
+            .letter-card .signature {
+                font-size: 1.4rem;
+            }
+            .letter-card {
+                padding: 22px 14px;
+                max-height: 68vh;
+            }
         }
 
         /* Portlash zarralari */
@@ -303,10 +331,11 @@
             will-change: transform, opacity;
         }
 
-        /* Diagnostika elementlari */
+        /* Diagnostika elementlari (notch/xavfsiz zonaga mos) */
         .audio-status {
             position: fixed;
-            bottom: 10px;
+            top: max(10px, env(safe-area-inset-top));
+            bottom: auto;
             left: 50%;
             transform: translateX(-50%);
             font-size: 0.68rem;
@@ -327,7 +356,8 @@
 
         .sound-btn {
             position: fixed;
-            bottom: 40px;
+            top: calc(max(10px, env(safe-area-inset-top)) + 36px);
+            bottom: auto;
             left: 50%;
             transform: translateX(-50%);
             background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
@@ -385,7 +415,7 @@
             <div class="letter-card" id="letterCard">
                 <h2>For someone truly dear,</h2>
                 <div class="letter-text" id="letterText"></div>
-                <div class="signature" id="signature">With endless love and warmth, [Ismingiz]</div>
+                <div class="signature" id="signature">With endless love and warmth, Sevinch</div>
             </div>
             <button class="back-btn" onclick="closeLetter()">Orqaga qaytish ↩</button>
         </div>
@@ -420,7 +450,7 @@
             starsContainer.appendChild(dot);
         }
 
-        for (let i = 0; i < 20; i++) {
+        for (let i = 0; i < 14; i++) {
             const star = document.createElement('div');
             star.classList.add('star-sparkle');
             star.style.left = `${Math.random() * 100}%`;
@@ -432,7 +462,7 @@
 
             const tint = starTints[Math.floor(Math.random() * starTints.length)].c;
             star.style.background = `rgba(${tint}, 1)`;
-            star.style.filter = `drop-shadow(0 0 ${4 + size / 2}px rgba(${tint}, 0.9))`;
+            star.style.filter = `drop-shadow(0 0 ${3 + size / 3}px rgba(${tint}, 0.85))`;
 
             star.style.setProperty('--duration', `${3 + Math.random() * 3}s`);
             star.style.setProperty('--delay', `${Math.random() * 4}s`);
@@ -451,18 +481,19 @@
 
         /* ===================== SHE'R MATNI (INGLIZCHA) ===================== */
         const poemLines = [
-            "Somewhere between yesterday and tomorrow,",
-            "a new year is quietly beginning for you.",
-            "The stars have been waiting all night,",
-            "just to watch this moment arrive.",
-            "May your days ahead be soft with laughter,",
-            "and your nights be full of easy dreams.",
-            "May every hard road you've walked",
-            "lead you somewhere even brighter.",
-            "You are loved more than you know,",
-            "and tonight, the whole sky agrees.",
-            "So breathe it in, this quiet magic —",
-            "happy birthday, dear one. 🌟"
+            "I don't even know what to say,",
+            "because somehow, words never feel like enough.",
+            "I just hope this new year of your life",
+            "brings you more peace, laughter, and beautiful moments.",
+            "You've been through so much in your life,",
+            "and I hope you're proud of yourself for still being here,",
+            "for still moving forward, and for staying strong.",
+            "There is still so much waiting for you —",
+            "new dreams, new places, and memories you haven't made yet.",
+            "And whatever happens from here,",
+            "you don't have to go through it all alone.",
+            "I'm with you.",
+            "Happy birthday, dear one."
         ];
 
         let activeTimeouts = [];
@@ -545,19 +576,27 @@
         });
 
         function rampVolume() {
-            let vol = 0;
-            bgMusic.volume = 0;
-            const fade = setInterval(() => {
+            clearVolumeFade();
+            let vol = bgMusic.volume || 0;
+            volumeFadeInterval = setInterval(() => {
                 vol += 0.006;
                 if (vol >= 0.14) {
                     vol = 0.14;
-                    clearInterval(fade);
+                    clearVolumeFade();
                 }
-                try { bgMusic.volume = vol; } catch (e) { clearInterval(fade); }
+                try { bgMusic.volume = vol; } catch (e) { clearVolumeFade(); }
             }, 140);
         }
 
         let musicStarted = false;
+        let volumeFadeInterval = null;
+
+        function clearVolumeFade() {
+            if (volumeFadeInterval) {
+                clearInterval(volumeFadeInterval);
+                volumeFadeInterval = null;
+            }
+        }
 
         function tryStartMusic() {
             if (musicStarted) return;
@@ -591,6 +630,7 @@
         });
 
         function enableSoundManually() {
+            clearVolumeFade();
             bgMusic.volume = 0.14;
             bgMusic.play().then(() => {
                 musicStarted = true;
@@ -602,21 +642,23 @@
         }
 
         function fadeOutMusic() {
+            clearVolumeFade();
             let vol = bgMusic.volume;
-            const fade = setInterval(() => {
+            volumeFadeInterval = setInterval(() => {
                 vol -= 0.03;
                 if (vol <= 0) {
                     vol = 0;
-                    clearInterval(fade);
+                    clearVolumeFade();
                     bgMusic.pause();
                     bgMusic.currentTime = 0;
                 }
-                try { bgMusic.volume = vol; } catch (e) { clearInterval(fade); bgMusic.pause(); }
+                try { bgMusic.volume = vol; } catch (e) { clearVolumeFade(); bgMusic.pause(); }
             }, 60);
         }
 
         function openLetter() {
             createExplosion();
+            tryStartMusic();
 
             setTimeout(() => {
                 welcomePage.classList.add('hidden');
@@ -679,7 +721,7 @@
         }
 
         function startReadingEffect(token) {
-            const displayed = []; // hozir ekranda turgan qatorlar (eng ko'pi bilan 2 tasi)
+            let index = 0;
 
             function revealChars(spans, onDone) {
                 let i = 0;
@@ -704,46 +746,18 @@
                 nextChar();
             }
 
-            function removeLine(lineObj) {
-                if (!lineObj) return;
-                lineObj.el.classList.remove('line-visible');
-                lineObj.el.classList.add('line-exit');
-                setTO(() => {
-                    const siblings = Array.from(letterTextElem.querySelectorAll('.poem-line')).filter(el => el !== lineObj.el);
-                    const firstRects = siblings.map(el => el.getBoundingClientRect());
-
-                    if (lineObj.el.parentNode) lineObj.el.remove();
-
-                    // FLIP: qolgan qator(lar) bo'shagan joyga yengil, smooth tarzda ko'tariladi
-                    siblings.forEach((el, idx) => {
-                        const lastRect = el.getBoundingClientRect();
-                        const deltaY = firstRects[idx].top - lastRect.top;
-                        if (Math.abs(deltaY) > 0.5) {
-                            el.style.transition = 'none';
-                            el.style.transform = `translateY(${deltaY}px)`;
-                            requestAnimationFrame(() => {
-                                requestAnimationFrame(() => {
-                                    el.style.transition = 'transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)';
-                                    el.style.transform = 'translateY(0)';
-                                });
-                            });
-                            setTimeout(() => {
-                                el.style.transition = '';
-                                el.style.transform = '';
-                            }, 700);
-                        }
-                    });
-                }, 750);
-            }
-
-            function addLine(i) {
+            function playLine() {
                 if (token !== readingToken) return;
 
-                const { lineEl, spans } = buildLine(poemLines[i]);
-                const lineObj = { el: lineEl, spans };
-                displayed.push(lineObj);
+                if (index >= poemLines.length) {
+                    setTO(() => showFullLetter(token), 300);
+                    return;
+                }
 
-                // Gap teng ravishda, silliq paydo bo'ladi (bachkana emas)
+                letterTextElem.innerHTML = '';
+                const { lineEl, spans } = buildLine(poemLines[index]);
+
+                // Gap teng ravishda, silliq paydo bo'ladi
                 requestAnimationFrame(() => {
                     setTO(() => {
                         if (token !== readingToken) return;
@@ -755,42 +769,31 @@
 
                 setTO(() => {
                     if (token !== readingToken) return;
-                    revealChars(spans, () => onLineFullyRead(i));
+                    revealChars(spans, () => {
+                        // Gap to'liq o'qildi — biroz ushlab turib, teng ravishda yo'qoladi
+                        setTO(() => {
+                            if (token !== readingToken) return;
+                            lineEl.classList.remove('line-visible');
+                            lineEl.classList.add('line-exit');
+                        }, 900);
+
+                        setTO(() => {
+                            if (token !== readingToken) return;
+                            index++;
+                            playLine();
+                        }, 900 + 780);
+                    });
                 }, entranceDuration);
             }
 
-            function onLineFullyRead(i) {
-                if (token !== readingToken) return;
-
-                // Gap to'liq o'qildi — biroz ushlab turamiz, shu payt ikkinchi qator ham shu yerda turadi
-                setTO(() => {
-                    if (token !== readingToken) return;
-
-                    // Bittadan oldingi (eski, allaqachon o'qilgan) qator endi yo'qoladi
-                    if (i >= 1) {
-                        removeLine(displayed.shift());
-                    }
-
-                    if (i + 1 < poemLines.length) {
-                        addLine(i + 1);
-                    } else {
-                        // She'r tugadi — qolgan qator ham biroz turib, keyin to'liq maktub chiqadi
-                        setTO(() => {
-                            if (token !== readingToken) return;
-                            displayed.forEach(d => removeLine(d));
-                            setTO(() => showFullLetter(token), 750);
-                        }, 1300);
-                    }
-                }, 900);
-            }
-
-            addLine(0);
+            playLine();
         }
 
         function closeLetter() {
             readingToken++;
             clearAllTimeouts();
             isReading = false;
+            musicStarted = false;
             letterTextElem.innerHTML = '';
             signatureElem.classList.remove('visible');
 
